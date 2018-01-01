@@ -19,6 +19,7 @@
 var express = require('express'); // app server
 var bodyParser = require('body-parser'); // parser for post requests
 var Conversation = require('watson-developer-cloud/conversation/v1'); // watson sdk
+var twilio = require('twilio');
 
 var app = express();
 
@@ -34,6 +35,8 @@ var conversation = new Conversation({
   //'password': process.env.CONVERSATION_PASSWORD,
   'version_date': '2017-05-26'
 });
+
+
 
 // Endpoint to be call from the client side
 app.post('/api/message', function(req, res) {
@@ -94,10 +97,14 @@ function updateMessage(input, response) {
 
 /* Twilio */
 var contexts = [];
-app.get('/smssent', function (req, res) {
-  var message = req.query.Body;
-  var number = req.query.From;
-  var twilioNumber = req.query.To;
+var IceCreameConversation = new Conversation({
+    version_date: Conversation.VERSION_DATE_2016_09_20
+  });
+
+app.post('/api/smssent', function (req, res) {
+  var message = req.body.Body;
+  var number = req.body.From;
+  var twilioNumber = req.body.To;
 
   var context = null;
   var index = 0;
@@ -113,22 +120,25 @@ app.get('/smssent', function (req, res) {
 
   console.log('Recieved message from ' + number + ' saying \'' + message  + '\'');
 
-  var conversation = new ConversationV1({
-    username: '',
-    password: '',
-    version_date: ConversationV1.VERSION_DATE_2016_09_20
-  });
+  //var conversation = new ConversationV1({
+    //username: '',
+    //password: '',
+   // version_date: ConversationV1.VERSION_DATE_2016_09_20
+ // });
+
+  var icecream_workspace = process.env.ICeCream_WORKSPACE_ID || '<workspace-id>';
 
   console.log(JSON.stringify(context));
   console.log(contexts.length);
 
-  conversation.message({
+  IceCreameConversation.message({
     input: { text: message },
-    workspace_id: '',
+    workspace_id: icecream_workspace,
     context: context
    }, function(err, response) {
        if (err) {
          console.error(err);
+         res.send(err);
        } else {
          console.log(response.output.text[0]);
          if (context == null) {
@@ -145,11 +155,8 @@ app.get('/smssent', function (req, res) {
            // Call REST API here (order pizza, etc.)
          }
 
-         var client = require('twilio')(
-           '',
-           ''
-         );
-
+      //twilio integration
+         var client = new twilio(process.env.twilioaccountSid,process.env.twilioAuth);
          client.messages.create({
            from: twilioNumber,
            to: number,
@@ -159,10 +166,12 @@ app.get('/smssent', function (req, res) {
              console.error(err.message);
            }
          });
+         
+         res.send(response);
        }
   });
 
-  res.send('');
+  //res.send();
 });
 
 

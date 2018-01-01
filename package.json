@@ -23,6 +23,7 @@
     "cf-cli": "^0.2.0",
     "dotenv": "^2.0.0",
     "express": "^4.16.1",
+    "twilio": "^3.11.0",
     "watson-developer-cloud": "^2.40.0"
   },
   "devDependencies": {
