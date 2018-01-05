@@ -12,6 +12,7 @@ var contexts = [];
 var appRouter = function(app) {
 app.post("/api/sms", function(req,res){
  console.log(req.body);
+ console.log(req);
  const twiml = new MessagingResponse();
  //Watson call
  var message = req.body.Body;
