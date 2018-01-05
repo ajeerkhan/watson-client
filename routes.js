@@ -3,14 +3,18 @@
 var Conversation = require('watson-developer-cloud/conversation/v1'); // watson sdk
 var Twilio = require('twilio');
 var MessagingResponse = require('twilio').twiml.MessagingResponse;
+var bodyParser = require('body-parser');
 
 var conversation = new Conversation({
     version_date: Conversation.VERSION_DATE_2016_09_20 
 });
 var workspaceId= process.env.ICeCream_WORKSPACE_ID;
 var contexts = [];
+// create application/x-www-form-urlencoded parser
+var urlencodedParser = bodyParser.urlencoded({ extended: false });
+
 var appRouter = function(app) {
-app.post("/api/sms", function(req,res){
+app.post("/api/sms",urlencodedParser, function(req,res){
  console.log(req.body);
  console.log(req);
  const twiml = new MessagingResponse();
@@ -52,7 +56,7 @@ console.log("Conversation Request -> ", conversationReq);
  console.log("Contexts length -> " + contexts.length);
 
  conversation.message(conversationReq, function(err, response) {
-  res.writeHead(200, {'Content-Type': 'text/xml'});
+  //res.writeHead(200, {'Content-Type': 'text/xml'});
     if (err) {
       console.error("Conversation Error ->" + err);
       twiml.message(err);

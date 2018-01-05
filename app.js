@@ -25,7 +25,7 @@ var app = express();
 
 // Bootstrap application settings
 app.use(express.static('./public')); // load UI from public folder
-app.use(bodyParser.json());
+//app.use(bodyParser.json());
 
 // Create the service wrapper
 var conversation = new Conversation({
@@ -36,10 +36,13 @@ var conversation = new Conversation({
   'version_date': '2017-05-26'
 });
 
+// create application/json parser
+var jsonParser = bodyParser.json();
+
 
 
 // Endpoint to be call from the client side
-app.post('/api/message', function(req, res) {
+app.post('/api/message',jsonParser, function(req, res) {
   var workspace = process.env.WORKSPACE_ID || '<workspace-id>';
   if (!workspace || workspace === '<workspace-id>') {
     return res.json({
@@ -101,7 +104,7 @@ var IceCreameConversation = new Conversation({
     version_date: Conversation.VERSION_DATE_2016_09_20
   });
 
-app.post('/api/smssent', function (req, res) {
+app.post('/api/smssent',jsonParser, function (req, res) {
   var message = req.body.Body;
   var number = req.body.From;
   var twilioNumber = req.body.To;
