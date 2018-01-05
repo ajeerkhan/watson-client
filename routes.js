@@ -15,9 +15,9 @@ app.post("/api/sms", function(req,res){
  console.log(req);
  const twiml = new MessagingResponse();
  //Watson call
- var message = req.body.Body;
- var number = req.body.From;
- var twilioNumber = req.body.To;
+ var message = req.body.Body || req.query.Body || process.env.default_Message;
+ var number = req.body.From || req.query.From ||  process.env.default_From;
+ var twilioNumber = req.body.To || req.query.To ||  process.env.default_To;
  
  const twilioRequest = {
     Message: message,
