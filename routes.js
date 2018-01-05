@@ -97,6 +97,9 @@ console.log("Conversation Request -> ", conversationReq);
       twiml.message(response.output.text[0]);
       console.log("Conversation success response back to customer -> " + response.output.text[0]);
       console.log("Conversation success response back to twilio -> " + twiml);
+      res.set({
+        'Content-Type' : 'text/xml'
+      });
       res.send(response);
     }
 });
