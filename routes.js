@@ -52,6 +52,7 @@ console.log("Conversation Request -> ", conversationReq);
  console.log("Contexts length -> " + contexts.length);
 
  conversation.message(conversationReq, function(err, response) {
+  res.writeHead(200, {'Content-Type': 'text/xml'});
     if (err) {
       console.error("Conversation Error ->" + err);
       twiml.message(err);
