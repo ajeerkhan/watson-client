@@ -19,7 +19,7 @@
 var express = require('express'); // app server
 var bodyParser = require('body-parser'); // parser for post requests
 var Conversation = require('watson-developer-cloud/conversation/v1'); // watson sdk
-var twilio = require('twilio');
+var Twilio = require('twilio');
 
 var app = express();
 
@@ -105,7 +105,7 @@ app.post('/api/smssent', function (req, res) {
   var message = req.body.Body;
   var number = req.body.From;
   var twilioNumber = req.body.To;
-
+  
   var context = null;
   var index = 0;
   var contextIndex = 0;
@@ -156,7 +156,7 @@ app.post('/api/smssent', function (req, res) {
          }
 
       //twilio integration
-         var client = new twilio(process.env.twilioaccountSid,process.env.twilioAuth);
+         var client = new Twilio(process.env.twilioaccountSid,process.env.twilioAuth);
          client.messages.create({
            from: twilioNumber,
            to: number,
@@ -174,5 +174,6 @@ app.post('/api/smssent', function (req, res) {
   //res.send();
 });
 
+var appRouter = require("./routes")(app);
 
 module.exports = app;
