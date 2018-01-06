@@ -14,7 +14,7 @@ var contexts = [];
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 var appRouter = function(app) {
-app.post("/api/sms",urlencodedParser, function(req,res){
+app.post("/api/sms", function(req,res){
  console.log(req.body);
  console.log(req);
  const twiml = new MessagingResponse();
@@ -100,7 +100,7 @@ console.log("Conversation Request -> ", conversationReq);
       res.set({
         'Content-Type' : 'text/xml'
       });
-      res.send(response);
+      res.send(twiml);
     }
 });
 
