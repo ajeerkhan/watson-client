@@ -97,7 +97,7 @@ console.log("Conversation Request -> ", conversationReq);
 
    //twilio integration
     //version type 1
-    /* var client = new Twilio(process.env.twilioaccountSid,process.env.twilioAuth);
+     var client = new Twilio(process.env.twilioaccountSid,process.env.twilioAuth);
       client.messages.create({
         from: twilioNumber,
         to: number,
@@ -107,7 +107,7 @@ console.log("Conversation Request -> ", conversationReq);
           console.error(err.message);
         }
       });
-      */
+      
 
       //Type -2 twilio conversation
       //twiml.message(response.output.text[0]);
@@ -117,7 +117,7 @@ console.log("Conversation Request -> ", conversationReq);
         'Content-Type' : 'text/xml'
       }); 
       res.send(twiml); */
-      res.send(response.output.text[0]);
+      res.send('');
     }
 });
 
