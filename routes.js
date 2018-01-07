@@ -2,7 +2,7 @@
 //Router, has holds all routes for services.
 var Conversation = require('watson-developer-cloud/conversation/v1'); // watson sdk
 var Twilio = require('twilio');
-var MessagingResponse = require('twilio').twiml.MessagingResponse;
+//var MessagingResponse = require('twilio').twiml.MessagingResponse;
 var bodyParser = require('body-parser');
 
 var conversation = new Conversation({
@@ -12,17 +12,30 @@ var workspaceId= process.env.ICeCream_WORKSPACE_ID;
 var contexts = [];
 // create application/x-www-form-urlencoded parser
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
-
+var jsonParser = bodyParser.json();
 var appRouter = function(app) {
-app.post("/api/sms", function(req,res){
+app.use("/api/sms",jsonParser, function(req,res){
  console.log(req.body);
  console.log(req);
- const twiml = new MessagingResponse();
+ //const twiml = new MessagingResponse();
  //Watson call
- var message = req.body.Body || req.query.Body || process.env.default_Message;
- var number = req.body.From || req.query.From ||  process.env.default_From;
- var twilioNumber = req.body.To || req.query.To ||  process.env.default_To;
- 
+ var message = process.env.default_Message;
+ var number = process.env.default_From;
+ var twilioNumber = process.env.default_To; 
+
+ if(req.query && req.query.Body && req.query.From && req.query.To){
+    
+    message = req.query.Body;
+    number = req.query.From;
+    twilioNumber = req.query.To;
+ }
+ else  if(req.body && req.body.Body && req.body.From && req.body.To){
+    message = req.body.Body;
+    number = req.body.From;
+    twilioNumber = req.body.To;
+}
+
+
  const twilioRequest = {
     Message: message,
     From: number,
@@ -59,9 +72,12 @@ console.log("Conversation Request -> ", conversationReq);
   //res.writeHead(200, {'Content-Type': 'text/xml'});
     if (err) {
       console.error("Conversation Error ->" + err);
-      twiml.message(err);
-      console.error("Conversation Error Message ->" + twiml);
-      res.send(twiml);
+      /*twiml.message('Sorry! we are not able to process your message currently, please try after sometime.');
+      //console.error("Conversation Error Message ->" + twiml);
+      res.set({
+        'Content-Type' : 'text/xml'
+      }); */
+      res.send('Sorry! we are not able to process your message currently, please try after sometime.');
     } 
     else {
       console.log(response.output.text[0]);
@@ -80,8 +96,8 @@ console.log("Conversation Request -> ", conversationReq);
       }
 
    //twilio integration
-   /* //version type 1
-      var client = new Twilio(process.env.twilioaccountSid,process.env.twilioAuth);
+    //version type 1
+    /* var client = new Twilio(process.env.twilioaccountSid,process.env.twilioAuth);
       client.messages.create({
         from: twilioNumber,
         to: number,
@@ -94,13 +110,14 @@ console.log("Conversation Request -> ", conversationReq);
       */
 
       //Type -2 twilio conversation
-      twiml.message(response.output.text[0]);
-      console.log("Conversation success response back to customer -> " + response.output.text[0]);
-      console.log("Conversation success response back to twilio -> " + twiml);
-      res.set({
+      //twiml.message(response.output.text[0]);
+      //console.log("Conversation success response back to customer -> " + response.output.text[0]);
+      //console.log("Conversation success response back to twilio -> " + twiml);
+      /*res.set({
         'Content-Type' : 'text/xml'
-      });
-      res.send(twiml);
+      }); 
+      res.send(twiml); */
+      res.send(response.output.text[0]);
     }
 });
 
