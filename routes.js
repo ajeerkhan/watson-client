@@ -2,6 +2,7 @@
 //Router, has holds all routes for services.
 var Conversation = require('watson-developer-cloud/conversation/v1'); // watson sdk
 var Twilio = require('twilio');
+var Random = require("random-js");
 //var MessagingResponse = require('twilio').twiml.MessagingResponse;
 var bodyParser = require('body-parser');
 
@@ -9,6 +10,7 @@ var conversation = new Conversation({
     version_date: Conversation.VERSION_DATE_2016_09_20 
 });
 var workspaceId= process.env.ICeCream_WORKSPACE_ID;
+var wsReservation = process.env.wsReservationSystem;
 var contexts = [];
 // create application/x-www-form-urlencoded parser
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
@@ -135,6 +137,110 @@ console.log("Conversation Request -> ", conversationReq);
  };
  sms.message();
  res.send(req.body); */
+
+});
+
+/* Reservation system api */
+app.use("/api/reservation",jsonParser, function(req,res) {
+ 
+var message = process.env.default_Message;
+var number = process.env.default_From;
+
+
+ if(req.query && req.query.Body && req.query.From){
+    
+    message = req.query.Body;
+    number = req.query.From;
+ }
+ else  if(req.body && req.body.Body && req.body.From){
+    message = req.body.Body;
+    number = req.body.From;
+}
+
+var context = null;
+var index = 0;
+var contextIndex = 0;
+contexts.forEach(function(value) {
+  console.log(value.from);
+  if (value.from == number) {
+    context = value.context;
+    contextIndex = index;
+  }
+  index = index + 1;
+});
+
+var conversationMessage = {
+ input:{
+   text: message
+ },
+ workspace_id: wsReservation,
+ context: context
+};
+
+conversation.message(conversationMessage, function(err, data){
+ if(err){
+   res.send("Sorry! we are not able to process your message currently, please try after sometime.");
+ }
+
+ if (context == null) {
+      contexts.push({'from': number, 'context': data.context});
+    } 
+    else {
+      contexts[contextIndex].context = data.context;
+    }
+ 
+   var intent = data.intents[0].intent;
+   
+   if(data.context!=null  && data.context.CanReserve!=null && data.context.CanReserve){
+     var random = new Random(Random.engines.mt19937().autoSeed);
+     if(random.integer(1,100) %  2 ==1) 
+       {
+        contexts[contextIndex].context.done = "true";
+       }
+       else 
+       {
+        contexts[contextIndex].context.done = "false";
+       }
+
+       conversationMessage = {
+        input:{
+          text: "done"
+        },
+        workspace_id: wsReservation,
+        context:  contexts[contextIndex].context
+       };
+
+      conversation.message(conversationMessage, function(err, data){
+        if(err){
+          res.send("Sorry! we are not able to process your message currently, please try after sometime.");
+        }
+      
+         contexts[contextIndex].context = data.context;
+         contexts[contextIndex].context = data.context;
+         var intent = data.intents[0].intent;
+
+         if(intent=="done"){
+          //remove the user from the contexts.
+          contexts.splice(contextIndex,1);
+     
+        }
+     
+       res.send(data);
+
+      });
+
+}
+
+   if(intent=="done"){
+     //remove the user from the contexts.
+     contexts.splice(contextIndex,1);
+
+   }
+   if(!(data.context!=null  && data.context.CanReserve!=null && data.context.CanReserve))
+      res.send(data);
+
+});
+
 
 });
 
